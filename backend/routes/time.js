@@ -42,7 +42,7 @@ router.post('/clock-in', authenticateToken, async (req, res) => {
     // Broadcast event for real-time listeners
     broadcastToUser(userId, 'clock-in', { userId, clockIn: toIso(timeEntry.clock_in) });
   } catch (error) {
-    console.error('Clock in error:', error);
+    logger.error('Clock in error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -84,7 +84,7 @@ router.post('/clock-out', authenticateToken, async (req, res) => {
   // Determine last clock out (this one) to send to listeners
   broadcastToUser(userId, 'clock-out', { userId, clockOut: toIso(timeEntry.clock_out), lastClockOut: toIso(timeEntry.clock_out), entryId });
   } catch (error) {
-    console.error('Clock out error:', error);
+    logger.error('Clock out error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -111,7 +111,7 @@ router.get('/entries', authenticateToken, async (req, res) => {
     }));
     res.json({ entries });
   } catch (error) {
-    console.error('Get entries error:', error);
+    logger.error('Get entries error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -129,7 +129,7 @@ router.get('/status', authenticateToken, async (req, res) => {
     const last = await pool.query('SELECT clock_out FROM time_entries WHERE user_id = $1 AND clock_out IS NOT NULL ORDER BY clock_out DESC LIMIT 1', [userId]);
     return res.json({ status: 'clocked-out', activeEntry: null, lastClockOut: last.rows.length ? toIso(last.rows[0].clock_out) : null });
   } catch (error) {
-    console.error('Get status error:', error);
+    logger.error('Get status error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -146,7 +146,7 @@ router.delete('/entry/:id', authenticateToken, async (req, res) => {
     await pool.query('DELETE FROM time_entries WHERE id = $1', [entryId]);
     return res.json({ message: 'Time entry deleted successfully' });
   } catch (error) {
-    console.error('Delete entry error:', error);
+    logger.error('Delete entry error', { error: error.message, stack: error.stack, userId: req.user.id, entryId: req.params.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -504,7 +504,7 @@ router.get('/settings', authenticateToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user settings error:', error);
+    logger.error('Get user settings error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -613,7 +613,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update user settings error:', error);
+    logger.error('Update user settings error', { error: error.message, stack: error.stack, userId: req.user.id });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
