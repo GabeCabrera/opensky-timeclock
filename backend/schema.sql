@@ -1,0 +1,7 @@
+-- Legacy minimal schema (Deprecated)
+-- This file is retained only for historical reference and is NOT representative of the
+-- current production schema. See `schema-complete.sql` and migrations/ for authoritative state.
+-- The old schema referenced a `username` column which has been removed in favor of invite-based
+-- provisioning using email only.
+--
+-- Please use migrations for any future changes.
